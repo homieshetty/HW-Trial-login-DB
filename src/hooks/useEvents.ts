@@ -1,10 +1,12 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, where } from "firebase/firestore";
 import { db } from '@/lib/firebase';
 import type { Event } from '@/lib/types';
 import { useToast } from './use-toast';
+import { useAuth } from './useAuth';
 
 const EVENTS_COLLECTION = 'events';
 
@@ -12,12 +14,23 @@ export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const fetchEvents = useCallback(async () => {
+    if (!user) {
+        setEvents([]);
+        setIsLoading(false);
+        return;
+    };
+
     setIsLoading(true);
     try {
       const eventsCollection = collection(db, EVENTS_COLLECTION);
-      const q = query(eventsCollection, orderBy("date", "desc"));
+      const q = query(
+        eventsCollection, 
+        where("userId", "==", user.uid), 
+        orderBy("date", "desc")
+      );
       const querySnapshot = await getDocs(q);
       const eventsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
       setEvents(eventsData);
@@ -31,19 +44,23 @@ export function useEvents() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, user]);
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
-  const addEvent = useCallback(async (event: Omit<Event, 'id'>) => {
+  const addEvent = useCallback(async (event: Omit<Event, 'id' | 'userId'>) => {
+    if (!user) {
+        toast({ variant: "destructive", title: "Authentication Error", description: "You must be logged in to add an event." });
+        return;
+    }
     setIsLoading(true);
     try {
-      const docRef = await addDoc(collection(db, EVENTS_COLLECTION), event);
-      setEvents(prevEvents => [{ id: docRef.id, ...event }, ...prevEvents]);
-       // Manually re-sort to be safe
-      setEvents(prev => [...prev].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      const newEvent = { ...event, userId: user.uid };
+      const docRef = await addDoc(collection(db, EVENTS_COLLECTION), newEvent);
+      // No need for local state update, fetchEvents will be called by useEffect
+      fetchEvents();
     } catch (error) {
       console.error("Error adding event to Firestore: ", error);
       toast({
@@ -54,14 +71,15 @@ export function useEvents() {
     } finally {
         setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, user, fetchEvents]);
 
   const getEvent = useCallback(async (id: string) => {
+    if (!user) return undefined;
     setIsLoading(true);
     try {
         const docRef = doc(db, EVENTS_COLLECTION, id);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
+        if (docSnap.exists() && docSnap.data().userId === user.uid) {
             return { id: docSnap.id, ...docSnap.data() } as Event;
         } else {
             return undefined;
@@ -77,11 +95,20 @@ export function useEvents() {
     } finally {
         setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, user]);
 
   const updateEvent = useCallback(async (updatedEvent: Event) => {
+    if (!user) return;
     setIsLoading(true);
     const { id, ...eventData } = updatedEvent;
+    
+    // Ensure userId is correctly maintained
+    if (eventData.userId !== user.uid) {
+        toast({ variant: "destructive", title: "Error", description: "You cannot update this event." });
+        setIsLoading(false);
+        return;
+    }
+
     try {
       const eventDoc = doc(db, EVENTS_COLLECTION, id);
       await updateDoc(eventDoc, eventData);
@@ -96,13 +123,20 @@ export function useEvents() {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchEvents, toast]);
+  }, [fetchEvents, toast, user]);
 
   const deleteEvent = useCallback(async (id: string) => {
+    if (!user) return;
     setIsLoading(true);
     try {
+      // Security check before deleting
+      const eventToDelete = await getEvent(id);
+      if (!eventToDelete) {
+          toast({ variant: "destructive", title: "Error", description: "Event not found or you don't have permission." });
+          return;
+      }
       await deleteDoc(doc(db, EVENTS_COLLECTION, id));
-      setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
+      fetchEvents();
     } catch (error) {
       console.error("Error deleting event from Firestore: ", error);
       toast({
@@ -113,7 +147,7 @@ export function useEvents() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, user, getEvent, fetchEvents]);
 
   return { events, isLoading, addEvent, getEvent, updateEvent, deleteEvent, fetchEvents };
 }

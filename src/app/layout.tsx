@@ -1,7 +1,11 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { BottomNav } from '@/components/BottomNav';
+import { AuthProvider } from '@/hooks/useAuth';
+import { AuthGuard } from '@/components/auth/AuthGuard';
+import { AppContent } from '@/components/AppContent';
 
 export const metadata: Metadata = {
   title: 'Cash Compass',
@@ -21,10 +25,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <div className="relative flex min-h-screen w-full flex-col">
-          <main className="flex-1 pb-24">{children}</main>
-          <BottomNav />
-        </div>
+        <AuthProvider>
+          <AuthGuard>
+            <AppContent>
+              {children}
+            </AppContent>
+          </AuthGuard>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

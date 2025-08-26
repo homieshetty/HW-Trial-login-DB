@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -17,6 +18,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { cn } from "@/lib/utils";
 import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Event name must be at least 2 characters." }).max(50),
@@ -26,13 +28,14 @@ const formSchema = z.object({
 });
 
 type EventFormProps = {
-  event?: Event;
+  event?: Omit<Event, 'userId'>;
 };
 
 export function EventForm({ event }: EventFormProps) {
   const router = useRouter();
   const { addEvent, updateEvent } = useEvents();
   const { toast } = useToast();
+  const { user } = useAuth();
   const isEditMode = !!event;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,9 +46,13 @@ export function EventForm({ event }: EventFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+      return;
+    }
     const eventData = { ...values, date: values.date.toISOString() };
     if (isEditMode && event) {
-      await updateEvent({ ...event, ...eventData });
+      await updateEvent({ ...event, ...eventData, userId: user.uid });
       toast({ title: "Success", description: "Event updated successfully." });
       router.push(`/event/${event.id}`);
     } else {
@@ -84,7 +91,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an event type" />
-                    </SelectTrigger>
+                    </Trigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Event">Event</SelectItem>
@@ -107,7 +114,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a status" />
-                    </SelectTrigger>
+                    </Trigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Unpaid">Unpaid</SelectItem>

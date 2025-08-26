@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEvents } from '@/hooks/useEvents';
@@ -8,11 +9,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { LogOut, PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
   const { events, isLoading } = useEvents();
+  const { logOut, user } = useAuth();
   const router = useRouter();
 
   const getStatusVariant = (status: string) => {
@@ -20,16 +23,29 @@ export default function Home() {
       case 'Paid':
         return 'default';
       case 'Unpaid':
+
         return 'secondary';
       default:
         return 'outline';
     }
   };
 
+  const handleLogout = async () => {
+    await logOut();
+    router.push('/login');
+  }
+
   return (
     <div className="container mx-auto p-4 md:p-6">
       <header className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            {user?.email && <p className="text-sm text-muted-foreground">{user.email}</p>}
+        </div>
+        <Button variant="ghost" size="sm" onClick={handleLogout}>
+            Logout
+            <LogOut className="ml-2 h-4 w-4" />
+        </Button>
       </header>
       
       <Card>
