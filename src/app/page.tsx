@@ -49,7 +49,6 @@ export default function Home() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Event</TableHead>
-                  <TableHead className="hidden md:table-cell">Type</TableHead>
                   <TableHead className="hidden md:table-cell">Date</TableHead>
                   <TableHead className="text-right">Payment Status</TableHead>
                 </TableRow>
@@ -60,9 +59,6 @@ export default function Home() {
                     <TableCell>
                       <div className="font-medium">{event.name}</div>
                       <div className="text-sm text-muted-foreground md:hidden">{format(new Date(event.date), 'MMM d, yyyy')}</div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Badge variant={event.type === 'Income' ? 'outline' : 'secondary'}>{event.type}</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {format(new Date(event.date), 'PPP')}
