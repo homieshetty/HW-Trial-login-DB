@@ -84,7 +84,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select an event type" />
-                    </Trigger>
+                    </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="Event">Event</SelectItem>
