@@ -20,12 +20,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       if (pathIsProtected && !user) {
         router.replace('/login');
       } else if (!pathIsProtected && user) {
+        // User is on a public page (like login) but is already authenticated
         router.replace('/');
       }
     }
   }, [user, loading, router, pathname]);
 
-  if (loading || (!user && !publicPaths.includes(pathname))) {
+  // While loading, or if we're about to redirect, show a loading skeleton.
+  if (loading || (!user && !publicPaths.includes(pathname)) || (user && publicPaths.includes(pathname))) {
      return (
         <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
             <p className="text-lg text-muted-foreground">Loading Your Financial Dashboard...</p>
