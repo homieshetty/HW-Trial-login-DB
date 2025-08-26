@@ -24,24 +24,27 @@ export default function EventDetailsPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
-    if (!isLoading && id) {
-      const foundEvent = getEvent(id);
-      if (foundEvent) {
-        setEvent(foundEvent);
-      } else {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Event not found.",
-        });
-        router.push('/');
-      }
-    }
-  }, [id, getEvent, isLoading, router, toast]);
-  
-  const handleDelete = () => {
     if (id) {
-      deleteEvent(id);
+      const fetchEvent = async () => {
+        const foundEvent = await getEvent(id);
+        if (foundEvent) {
+          setEvent(foundEvent);
+        } else {
+          toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Event not found.",
+          });
+          router.push('/');
+        }
+      };
+      fetchEvent();
+    }
+  }, [id, getEvent, router, toast]);
+  
+  const handleDelete = async () => {
+    if (id) {
+      await deleteEvent(id);
       toast({
         title: "Event Deleted",
         description: `"${event?.name}" has been successfully deleted.`,

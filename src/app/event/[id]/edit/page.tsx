@@ -21,20 +21,23 @@ export default function EditEventPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
-    if (id && !isLoading) {
-      const foundEvent = getEvent(id);
-      if (foundEvent) {
-        setEvent(foundEvent);
-      } else {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Event not found.",
-        });
-        router.replace('/');
-      }
+    if (id) {
+      const fetchEvent = async () => {
+        const foundEvent = await getEvent(id);
+        if (foundEvent) {
+          setEvent(foundEvent);
+        } else {
+          toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Event not found.",
+          });
+          router.replace('/');
+        }
+      };
+      fetchEvent();
     }
-  }, [id, getEvent, isLoading, router, toast]);
+  }, [id, getEvent, router, toast]);
 
   return (
     <div className="container mx-auto p-4 md:p-6 max-w-2xl">

@@ -39,17 +39,17 @@ export function EventForm({ event }: EventFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: isEditMode
       ? { ...event, date: new Date(event.date) }
-      : { name: "", type: "Event", paymentStatus: "Unpaid" },
+      : { name: "", type: "Event", paymentStatus: "Unpaid", date: new Date() },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const eventData = { ...values, date: values.date.toISOString() };
     if (isEditMode && event) {
-      updateEvent({ ...event, ...eventData });
+      await updateEvent({ ...event, ...eventData });
       toast({ title: "Success", description: "Event updated successfully." });
       router.push(`/event/${event.id}`);
     } else {
-      addEvent(eventData);
+      await addEvent(eventData);
       toast({ title: "Success", description: "Event created successfully." });
       router.push("/");
     }
