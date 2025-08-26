@@ -17,12 +17,10 @@ export default function Home() {
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'Completed':
+      case 'Paid':
         return 'default';
-      case 'Pending':
+      case 'Unpaid':
         return 'secondary';
-      case 'Cancelled':
-        return 'destructive';
       default:
         return 'outline';
     }
@@ -53,7 +51,7 @@ export default function Home() {
                   <TableHead>Event</TableHead>
                   <TableHead className="hidden md:table-cell">Type</TableHead>
                   <TableHead className="hidden md:table-cell">Date</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
+                  <TableHead className="text-right">Payment Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -70,7 +68,7 @@ export default function Home() {
                       {format(new Date(event.date), 'PPP')}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge variant={getStatusVariant(event.status)}>{event.status}</Badge>
+                      <Badge variant={getStatusVariant(event.paymentStatus)}>{event.paymentStatus}</Badge>
                     </TableCell>
                   </TableRow>
                 ))}

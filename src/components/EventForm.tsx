@@ -22,7 +22,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Event name must be at least 2 characters." }).max(50),
   type: z.enum(["Income", "Expense"], { required_error: "Please select an event type." }),
   date: z.date({ required_error: "A date is required." }),
-  status: z.enum(["Pending", "Completed", "Cancelled"], { required_error: "Please select a status." }),
+  paymentStatus: z.enum(["Paid", "Unpaid"], { required_error: "Please select a status." }),
 });
 
 type EventFormProps = {
@@ -39,7 +39,7 @@ export function EventForm({ event }: EventFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: isEditMode
       ? { ...event, date: new Date(event.date) }
-      : { name: "", type: "Expense", status: "Pending" },
+      : { name: "", type: "Expense", paymentStatus: "Unpaid" },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -98,10 +98,10 @@ export function EventForm({ event }: EventFormProps) {
 
           <FormField
             control={form.control}
-            name="status"
+            name="paymentStatus"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>Payment Status</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -109,9 +109,8 @@ export function EventForm({ event }: EventFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                    <SelectItem value="Unpaid">Unpaid</SelectItem>
+                    <SelectItem value="Paid">Paid</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

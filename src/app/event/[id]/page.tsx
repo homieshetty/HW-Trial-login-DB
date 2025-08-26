@@ -52,9 +52,8 @@ export default function EventDetailsPage() {
 
   const getStatusVariant = (status?: string) => {
     switch (status) {
-      case 'Completed': return 'default';
-      case 'Pending': return 'secondary';
-      case 'Cancelled': return 'destructive';
+      case 'Paid': return 'default';
+      case 'Unpaid': return 'secondary';
       default: return 'outline';
     }
   };
@@ -105,8 +104,8 @@ export default function EventDetailsPage() {
                     <span>{format(new Date(event.date), "PPP")}</span>
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
-                    <span className="text-muted-foreground">Status</span>
-                    <Badge variant={getStatusVariant(event.status)}>{event.status}</Badge>
+                    <span className="text-muted-foreground">Payment Status</span>
+                    <Badge variant={getStatusVariant(event.paymentStatus)}>{event.paymentStatus}</Badge>
                 </div>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">

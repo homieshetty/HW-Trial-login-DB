@@ -3,5 +3,5 @@ export interface Event {
   name: string;
   type: 'Income' | 'Expense';
   date: string; // ISO string
-  status: 'Pending' | 'Completed' | 'Cancelled';
+  paymentStatus: 'Paid' | 'Unpaid';
 }
