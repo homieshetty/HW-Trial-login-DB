@@ -22,20 +22,17 @@ export default function EditEventPage() {
 
   useEffect(() => {
     if (id) {
-      const fetchEvent = async () => {
-        const foundEvent = await getEvent(id);
-        if (foundEvent) {
-          setEvent(foundEvent);
-        } else {
-          toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Event not found.",
-          });
-          router.replace('/');
-        }
-      };
-      fetchEvent();
+      const foundEvent = getEvent(id);
+      if (foundEvent) {
+        setEvent(foundEvent);
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Event not found.",
+        });
+        router.replace('/');
+      }
     }
   }, [id, getEvent, router, toast]);
 
