@@ -97,7 +97,7 @@ export default function EventDetailsPage() {
             <CardContent className="space-y-4 text-base">
                 <div className="flex justify-between items-center border-b pb-2">
                     <span className="text-muted-foreground">Type</span>
-                    <Badge variant={event.type === 'Income' ? 'outline' : 'secondary'}>{event.type}</Badge>
+                    <Badge variant={'outline'}>{event.type}</Badge>
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
                     <span className="text-muted-foreground">Date</span>

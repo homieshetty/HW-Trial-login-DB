@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Event name must be at least 2 characters." }).max(50),
-  type: z.enum(["Income", "Expense"], { required_error: "Please select an event type." }),
+  type: z.enum(["Event", "ODC", "Others"], { required_error: "Please select an event type." }),
   date: z.date({ required_error: "A date is required." }),
   paymentStatus: z.enum(["Paid", "Unpaid"], { required_error: "Please select a status." }),
 });
@@ -39,7 +39,7 @@ export function EventForm({ event }: EventFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: isEditMode
       ? { ...event, date: new Date(event.date) }
-      : { name: "", type: "Expense", paymentStatus: "Unpaid" },
+      : { name: "", type: "Event", paymentStatus: "Unpaid" },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -87,8 +87,9 @@ export function EventForm({ event }: EventFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Income">Income</SelectItem>
-                    <SelectItem value="Expense">Expense</SelectItem>
+                    <SelectItem value="Event">Event</SelectItem>
+                    <SelectItem value="ODC">ODC</SelectItem>
+                    <SelectItem value="Others">Others</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
