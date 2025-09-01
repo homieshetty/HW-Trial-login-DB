@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -57,6 +58,15 @@ export default function EventDetailsPage() {
       default: return 'outline';
     }
   };
+  
+  const formatTime = (timeString?: string) => {
+    if (!timeString) return 'Not set';
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    return format(date, 'h:mm a');
+  };
 
   if (isLoading || !event) {
     return (
@@ -72,7 +82,7 @@ export default function EventDetailsPage() {
           <CardContent className="space-y-4">
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="h-6 w-full" />
           </CardContent>
           <CardFooter className="justify-end gap-2">
             <Skeleton className="h-10 w-24" />
@@ -102,6 +112,14 @@ export default function EventDetailsPage() {
                 <div className="flex justify-between items-center border-b pb-2">
                     <span className="text-muted-foreground">Date</span>
                     <span>{format(new Date(event.date), "PPP")}</span>
+                </div>
+                 <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-muted-foreground">Sign In Time</span>
+                    <span>{formatTime(event.signInTime)}</span>
+                </div>
+                <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-muted-foreground">Sign Out Time</span>
+                    <span>{formatTime(event.signOutTime)}</span>
                 </div>
                 <div className="flex justify-between items-center border-b pb-2">
                     <span className="text-muted-foreground">Payment Status</span>

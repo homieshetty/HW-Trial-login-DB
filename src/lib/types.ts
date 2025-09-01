@@ -5,4 +5,6 @@ export interface Event {
   type: 'Event' | 'ODC' | 'Others';
   date: string; // ISO string
   paymentStatus: 'Paid' | 'Unpaid';
+  signInTime?: string;
+  signOutTime?: string;
 }

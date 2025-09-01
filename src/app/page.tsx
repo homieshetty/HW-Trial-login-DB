@@ -60,7 +60,7 @@ export default function Home() {
               </TableHeader>
               <TableBody>
                 {events.map((event) => (
-                  <TableRow key={event.id} onClick={() => router.push(`/event/${event.id}`)} className="cursor-pointer hover:bg-accent/50">
+                  <TableRow key={event.id} onClick={() => router.push(`/event/${event.id}/edit`)} className="cursor-pointer hover:bg-accent/50">
                     <TableCell>
                       <div className="font-medium">{event.name}</div>
                       <div className="text-sm text-muted-foreground md:hidden">{format(new Date(event.date), 'MMM d, yyyy')}</div>

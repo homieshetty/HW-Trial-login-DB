@@ -24,6 +24,8 @@ const formSchema = z.object({
   type: z.enum(["Event", "ODC", "Others"], { required_error: "Please select an event type." }),
   date: z.date({ required_error: "A date is required." }),
   paymentStatus: z.enum(["Paid", "Unpaid"], { required_error: "Please select a status." }),
+  signInTime: z.string().optional(),
+  signOutTime: z.string().optional(),
 });
 
 type EventFormProps = {
@@ -39,12 +41,18 @@ export function EventForm({ event }: EventFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: isEditMode
-      ? { ...event, date: new Date(event.date) }
-      : { name: "", type: "Event", paymentStatus: "Unpaid", date: new Date() },
+      ? { ...event, date: new Date(event.date), signInTime: event.signInTime ?? '', signOutTime: event.signOutTime ?? '' }
+      : { name: "", type: "Event", paymentStatus: "Unpaid", date: new Date(), signInTime: '', signOutTime: '' },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const eventData = { ...values, date: values.date.toISOString() };
+    const eventData = { 
+        ...values, 
+        date: values.date.toISOString(),
+        signInTime: values.signInTime || undefined,
+        signOutTime: values.signOutTime || undefined,
+    };
+    
     if (isEditMode && event) {
       updateEvent({ ...event, ...eventData });
       toast({ title: "Success", description: "Event updated successfully." });
@@ -157,6 +165,35 @@ export function EventForm({ event }: EventFormProps) {
             </FormItem>
           )}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FormField
+            control={form.control}
+            name="signInTime"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Sign In Time</FormLabel>
+                <FormControl>
+                    <Input type="time" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+            <FormField
+            control={form.control}
+            name="signOutTime"
+            render={({ field }) => (
+                <FormItem>
+                <FormLabel>Sign Out Time</FormLabel>
+                <FormControl>
+                    <Input type="time" {...field} />
+                </FormControl>
+                <FormMessage />
+                </FormItem>
+            )}
+            />
+        </div>
         
         <Button type="submit" className="w-full md:w-auto">{isEditMode ? 'Save Changes' : 'Create Event'}</Button>
       </form>
