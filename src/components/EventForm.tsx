@@ -24,8 +24,16 @@ const formSchema = z.object({
   type: z.enum(["Event", "ODC", "Others"], { required_error: "Please select an event type." }),
   date: z.date({ required_error: "A date is required." }),
   paymentStatus: z.enum(["Paid", "Unpaid"], { required_error: "Please select a status." }),
-  signInTime: z.string().optional(),
-  signOutTime: z.string().optional(),
+  signInHour: z.coerce.number().min(0).max(23).optional(),
+  signInMinute: z.coerce.number().min(0).max(59).optional(),
+  signOutHour: z.coerce.number().min(0).max(23).optional(),
+  signOutMinute: z.coerce.number().min(0).max(59).optional(),
+}).refine(data => (data.signInHour !== undefined) === (data.signInMinute !== undefined), {
+    message: "Both sign-in hour and minute must be provided.",
+    path: ["signInHour"],
+}).refine(data => (data.signOutHour !== undefined) === (data.signOutMinute !== undefined), {
+    message: "Both sign-out hour and minute must be provided.",
+    path: ["signOutHour"],
 });
 
 type EventFormProps = {
@@ -41,16 +49,22 @@ export function EventForm({ event }: EventFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: isEditMode
-      ? { ...event, date: new Date(event.date), signInTime: event.signInTime ?? '', signOutTime: event.signOutTime ?? '' }
-      : { name: "", type: "Event", paymentStatus: "Unpaid", date: new Date(), signInTime: '', signOutTime: '' },
+      ? { 
+          ...event, 
+          date: new Date(event.date),
+        }
+      : { 
+          name: "", 
+          type: "Event", 
+          paymentStatus: "Unpaid", 
+          date: new Date(),
+        },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const eventData = { 
-        ...values, 
+    const eventData = {
+        ...values,
         date: values.date.toISOString(),
-        signInTime: values.signInTime || undefined,
-        signOutTime: values.signOutTime || undefined,
     };
     
     if (isEditMode && event) {
@@ -166,33 +180,68 @@ export function EventForm({ event }: EventFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <FormLabel>Sign In Time (24-hour)</FormLabel>
+          <div className="grid grid-cols-2 gap-4 mt-2">
             <FormField
-            control={form.control}
-            name="signInTime"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Sign In Time</FormLabel>
-                <FormControl>
-                    <Input type="time" {...field} className="dark:[color-scheme:dark]" />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+              control={form.control}
+              name="signInHour"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel className="text-xs text-muted-foreground">Hour</FormLabel>
+                  <FormControl>
+                      <Input type="number" placeholder="HH" min="0" max="23" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
             />
             <FormField
-            control={form.control}
-            name="signOutTime"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Sign Out Time</FormLabel>
-                <FormControl>
-                    <Input type="time" {...field} className="dark:[color-scheme:dark]" />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
+              control={form.control}
+              name="signInMinute"
+              render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs text-muted-foreground">Minute</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="MM" min="0" max="59" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+              )}
             />
+          </div>
+        </div>
+
+        <div>
+          <FormLabel>Sign Out Time (24-hour)</FormLabel>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <FormField
+              control={form.control}
+              name="signOutHour"
+              render={({ field }) => (
+                  <FormItem>
+                  <FormLabel className="text-xs text-muted-foreground">Hour</FormLabel>
+                  <FormControl>
+                      <Input type="number" placeholder="HH" min="0" max="23" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                  </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="signOutMinute"
+              render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs text-muted-foreground">Minute</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="MM" min="0" max="59" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+              )}
+            />
+          </div>
         </div>
         
         <Button type="submit" className="w-full md:w-auto">{isEditMode ? 'Save Changes' : 'Create Event'}</Button>
