@@ -29,13 +29,14 @@ const formSchema = z.object({
   signInMinute: z.coerce.number().min(0).max(59).optional(),
   signOutHour: z.coerce.number().min(0).max(23).optional(),
   signOutMinute: z.coerce.number().min(0).max(59).optional(),
-}).refine(data => (data.signInHour !== undefined) === (data.signInMinute !== undefined), {
+}).refine(data => (data.signInHour !== undefined && data.signInHour !== null) === (data.signInMinute !== undefined && data.signInMinute !== null), {
     message: "Both sign-in hour and minute must be provided.",
     path: ["signInHour"],
-}).refine(data => (data.signOutHour !== undefined) === (data.signOutMinute !== undefined), {
+}).refine(data => (data.signOutHour !== undefined && data.signOutHour !== null) === (data.signOutMinute !== undefined && data.signOutMinute !== null), {
     message: "Both sign-out hour and minute must be provided.",
     path: ["signOutHour"],
 });
+
 
 type EventFormProps = {
   event?: Event;
@@ -44,11 +45,9 @@ type EventFormProps = {
 // Custom component to render the validation message correctly for the time fields
 function TimeFieldsErrorMessage({ name }: { name: "signInHour" | "signOutHour" }) {
   const { error } = useFormField();
-  const formContext = useForm();
-  const fieldState = formContext.getFieldState(name, formContext.formState);
 
-  if (fieldState.error) {
-    return <FormMessage>{fieldState.error.message}</FormMessage>
+  if (error) {
+    return <FormMessage>{error.message}</FormMessage>
   }
   return null;
 }
@@ -71,7 +70,9 @@ export function EventForm({ event }: EventFormProps) {
           type: "Event", 
           paymentStatus: "Unpaid", 
           date: new Date(),
+          signInHour: 0,
           signInMinute: 0,
+          signOutHour: 0,
           signOutMinute: 0,
         },
   });
@@ -191,67 +192,78 @@ export function EventForm({ event }: EventFormProps) {
             </FormItem>
           )}
         />
-
-        <div className="space-y-2">
-            <FormLabel>Sign In Time (24-hour)</FormLabel>
-            <div className="flex items-center gap-2">
-              <FormField
-                control={form.control}
-                name="signInHour"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <span className="text-xl font-bold">:</span>
-              <FormField
-                control={form.control}
-                name="signInMinute"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <TimeFieldsErrorMessage name="signInHour" />
-        </div>
-
-        <div className="space-y-2">
-          <FormLabel>Sign Out Time (24-hour)</FormLabel>
-          <div className="flex items-center gap-2">
-            <FormField
-              control={form.control}
-              name="signOutHour"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <span className="text-xl font-bold">:</span>
-            <FormField
-              control={form.control}
-              name="signOutMinute"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-          <TimeFieldsErrorMessage name="signOutHour" />
-        </div>
+        <FormField
+          control={form.control}
+          name="signInHour"
+          render={() => (
+            <FormItem>
+              <FormLabel>Sign In Time (24-hour)</FormLabel>
+              <div className="flex items-center gap-2">
+                  <FormField
+                    control={form.control}
+                    name="signInHour"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <span className="text-xl font-bold">:</span>
+                  <FormField
+                    control={form.control}
+                    name="signInMinute"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+              </div>
+              <TimeFieldsErrorMessage name="signInHour" />
+            </FormItem>
+          )}
+        />
         
+        <FormField
+          control={form.control}
+          name="signOutHour"
+          render={() => (
+            <FormItem>
+                <FormLabel>Sign Out Time (24-hour)</FormLabel>
+                <div className="flex items-center gap-2">
+                    <FormField
+                    control={form.control}
+                    name="signOutHour"
+                    render={({ field }) => (
+                        <FormItem className="flex-1">
+                        <FormControl>
+                            <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
+                        </FormControl>
+                        </FormItem>
+                    )}
+                    />
+                    <span className="text-xl font-bold">:</span>
+                    <FormField
+                    control={form.control}
+                    name="signOutMinute"
+                    render={({ field }) => (
+                        <FormItem className="flex-1">
+                        <FormControl>
+                            <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
+                        </FormControl>
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <TimeFieldsErrorMessage name="signOutHour" />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full md:w-auto">{isEditMode ? 'Save Changes' : 'Create Event'}</Button>
       </form>
     </Form>
