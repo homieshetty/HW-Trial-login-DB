@@ -58,6 +58,8 @@ export function EventForm({ event }: EventFormProps) {
           type: "Event", 
           paymentStatus: "Unpaid", 
           date: new Date(),
+          signInMinute: 0,
+          signOutMinute: 0,
         },
   });
 
@@ -190,7 +192,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormItem>
                   <FormLabel className="text-xs text-muted-foreground">Hour</FormLabel>
                   <FormControl>
-                      <Input type="number" placeholder="HH" min="0" max="23" {...field} />
+                      <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                   </FormControl>
                   <FormMessage />
                   </FormItem>
@@ -203,7 +205,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormItem>
                     <FormLabel className="text-xs text-muted-foreground">Minute</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="MM" min="0" max="59" {...field} />
+                        <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -222,7 +224,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormItem>
                   <FormLabel className="text-xs text-muted-foreground">Hour</FormLabel>
                   <FormControl>
-                      <Input type="number" placeholder="HH" min="0" max="23" {...field} />
+                      <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                   </FormControl>
                   <FormMessage />
                   </FormItem>
@@ -235,7 +237,7 @@ export function EventForm({ event }: EventFormProps) {
                   <FormItem>
                     <FormLabel className="text-xs text-muted-foreground">Minute</FormLabel>
                     <FormControl>
-                        <Input type="number" placeholder="MM" min="0" max="59" {...field} />
+                        <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
