@@ -170,9 +170,6 @@ export function EventForm({ event }: EventFormProps) {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
                     initialFocus
                   />
                 </PopoverContent>
@@ -182,15 +179,14 @@ export function EventForm({ event }: EventFormProps) {
           )}
         />
 
-        <div>
+        <div className="space-y-2">
           <FormLabel>Sign In Time (24-hour)</FormLabel>
-          <div className="grid grid-cols-2 gap-4 mt-2">
+          <div className="flex items-center gap-2">
             <FormField
               control={form.control}
               name="signInHour"
               render={({ field }) => (
-                  <FormItem>
-                  <FormLabel className="text-xs text-muted-foreground">Hour</FormLabel>
+                  <FormItem className="flex-1">
                   <FormControl>
                       <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                   </FormControl>
@@ -198,12 +194,12 @@ export function EventForm({ event }: EventFormProps) {
                   </FormItem>
               )}
             />
+            <span className="text-xl font-bold -mt-2">:</span>
             <FormField
               control={form.control}
               name="signInMinute"
               render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs text-muted-foreground">Minute</FormLabel>
+                  <FormItem className="flex-1">
                     <FormControl>
                         <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                     </FormControl>
@@ -214,15 +210,14 @@ export function EventForm({ event }: EventFormProps) {
           </div>
         </div>
 
-        <div>
+        <div className="space-y-2">
           <FormLabel>Sign Out Time (24-hour)</FormLabel>
-          <div className="grid grid-cols-2 gap-4 mt-2">
+          <div className="flex items-center gap-2">
             <FormField
               control={form.control}
               name="signOutHour"
               render={({ field }) => (
-                  <FormItem>
-                  <FormLabel className="text-xs text-muted-foreground">Hour</FormLabel>
+                  <FormItem className="flex-1">
                   <FormControl>
                       <Input type="number" placeholder="HH" min="0" max="23" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                   </FormControl>
@@ -230,12 +225,12 @@ export function EventForm({ event }: EventFormProps) {
                   </FormItem>
               )}
             />
+            <span className="text-xl font-bold -mt-2">:</span>
             <FormField
               control={form.control}
               name="signOutMinute"
               render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs text-muted-foreground">Minute</FormLabel>
+                  <FormItem className="flex-1">
                     <FormControl>
                         <Input type="number" placeholder="MM" min="0" max="59" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : +e.target.value)} />
                     </FormControl>
