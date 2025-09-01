@@ -56,7 +56,7 @@ export function EventForm({ event }: EventFormProps) {
     if (isEditMode && event) {
       updateEvent({ ...event, ...eventData });
       toast({ title: "Success", description: "Event updated successfully." });
-      router.push(`/event/${event.id}`);
+      router.push(`/`);
     } else {
       addEvent(eventData);
       toast({ title: "Success", description: "Event created successfully." });
@@ -174,7 +174,7 @@ export function EventForm({ event }: EventFormProps) {
                 <FormItem>
                 <FormLabel>Sign In Time</FormLabel>
                 <FormControl>
-                    <Input type="time" {...field} />
+                    <Input type="time" {...field} className="dark:[color-scheme:dark]" />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
@@ -187,7 +187,7 @@ export function EventForm({ event }: EventFormProps) {
                 <FormItem>
                 <FormLabel>Sign Out Time</FormLabel>
                 <FormControl>
-                    <Input type="time" {...field} />
+                    <Input type="time" {...field} className="dark:[color-scheme:dark]" />
                 </FormControl>
                 <FormMessage />
                 </FormItem>
