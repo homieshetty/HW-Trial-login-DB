@@ -55,7 +55,7 @@ export function useEvents() {
     const currentEvents = getEventsFromStorage();
     const newEvent: Event = {
       ...newEventData,
-      id: new Date().toISOString() + Math.random().toString(), // Simple unique ID
+      id: Date.now().toString(), // Simple, URL-safe unique ID
     };
     saveEventsToStorage([...currentEvents, newEvent]);
   }, [getEventsFromStorage]);
