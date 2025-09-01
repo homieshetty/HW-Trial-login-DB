@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { Event } from '@/lib/types';
@@ -21,26 +21,26 @@ export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+  const [isActionAlertOpen, setIsActionAlertOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const longPressTimer = useRef<NodeJS.Timeout>();
   const wasLongPress = useRef(false);
-
 
   const handlePressStart = (eventData: Event) => {
     wasLongPress.current = false;
     longPressTimer.current = setTimeout(() => {
       wasLongPress.current = true;
-      setEventToDelete(eventData);
-      setIsAlertOpen(true);
+      setSelectedEvent(eventData);
+      setIsActionAlertOpen(true);
     }, 700); // 700ms for long press
   };
 
   const handlePressEnd = (eventData: Event) => {
     clearTimeout(longPressTimer.current);
     if (!wasLongPress.current) {
-      router.push(`/event/${eventData.id}/edit`);
+      router.push(`/event/${eventData.id}`);
     }
   };
   
@@ -48,15 +48,27 @@ export default function Home() {
     clearTimeout(longPressTimer.current);
   }
 
+  const handleEdit = () => {
+    if (selectedEvent) {
+      router.push(`/event/${selectedEvent.id}/edit`);
+    }
+    setIsActionAlertOpen(false);
+  };
+
+  const openDeleteConfirmation = () => {
+    setIsActionAlertOpen(false);
+    setIsDeleteConfirmOpen(true);
+  };
+
   const handleDelete = () => {
-    if (eventToDelete) {
-      deleteEvent(eventToDelete.id);
+    if (selectedEvent) {
+      deleteEvent(selectedEvent.id);
       toast({
         title: "Event Deleted",
-        description: `"${eventToDelete.name}" has been removed.`,
+        description: `"${selectedEvent.name}" has been removed.`,
       });
-      setIsAlertOpen(false);
-      setEventToDelete(null);
+      setIsDeleteConfirmOpen(false);
+      setSelectedEvent(null);
     }
   };
 
@@ -84,7 +96,7 @@ export default function Home() {
         <Card>
           <CardHeader>
             <CardTitle>All Events</CardTitle>
-            <CardDescription>Click to edit, or long-press to delete an event.</CardDescription>
+            <CardDescription>Click to view details, or long-press for options.</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -142,17 +154,41 @@ export default function Home() {
         </Card>
       </div>
 
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+      {/* Action Dialog (Edit/Delete options) */}
+      <AlertDialog open={isActionAlertOpen} onOpenChange={setIsActionAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Actions for "{selectedEvent?.name}"</AlertDialogTitle>
+            <AlertDialogDescription>
+              What would you like to do with this event?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <Button variant="outline" onClick={handleEdit}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+            <Button variant="destructive" onClick={openDeleteConfirmation}>
+               <Trash2 className="mr-2 h-4 w-4" />
+               Delete
+            </Button>
+            <AlertDialogCancel className="mt-2 sm:mt-0" onClick={() => setSelectedEvent(null)}>Cancel</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the event
-              <span className="font-bold"> "{eventToDelete?.name}"</span>.
+              <span className="font-bold"> "{selectedEvent?.name}"</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setEventToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setSelectedEvent(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -163,4 +199,3 @@ export default function Home() {
     </>
   );
 }
-
