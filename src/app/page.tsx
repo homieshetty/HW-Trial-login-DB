@@ -27,23 +27,41 @@ export default function Home() {
 
   const longPressTimer = useRef<NodeJS.Timeout>();
   const wasLongPress = useRef(false);
+  const hasScrolled = useRef(false);
+  const touchStartY = useRef(0);
 
-  const handlePressStart = (eventData: Event) => {
+  const handlePressStart = (eventData: Event, e?: React.TouchEvent) => {
     wasLongPress.current = false;
+    hasScrolled.current = false;
+    if (e) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+    
     longPressTimer.current = setTimeout(() => {
-      wasLongPress.current = true;
-      setSelectedEvent(eventData);
-      setIsActionAlertOpen(true);
+      if (!hasScrolled.current) {
+        wasLongPress.current = true;
+        setSelectedEvent(eventData);
+        setIsActionAlertOpen(true);
+      }
     }, 700); // 700ms for long press
   };
 
   const handlePressEnd = (eventData: Event) => {
     clearTimeout(longPressTimer.current);
-    if (!wasLongPress.current) {
+    if (!wasLongPress.current && !hasScrolled.current) {
       router.push(`/event/${eventData.id}`);
     }
   };
   
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const moveY = e.touches[0].clientY;
+    // If user has scrolled more than 10px, cancel the press actions
+    if (Math.abs(moveY - touchStartY.current) > 10) {
+      hasScrolled.current = true;
+      clearTimeout(longPressTimer.current);
+    }
+  };
+
   const handlePressCancel = () => {
     clearTimeout(longPressTimer.current);
   }
@@ -121,7 +139,8 @@ export default function Home() {
                       onMouseDown={() => handlePressStart(event)}
                       onMouseUp={() => handlePressEnd(event)}
                       onMouseLeave={handlePressCancel}
-                      onTouchStart={() => handlePressStart(event)}
+                      onTouchStart={(e) => handlePressStart(event, e)}
+                      onTouchMove={handleTouchMove}
                       onTouchEnd={() => handlePressEnd(event)}
                       className="cursor-pointer hover:bg-accent/50 select-none"
                     >
