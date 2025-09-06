@@ -14,7 +14,8 @@ export function Logo({ className }: LogoProps) {
         alt="Logo"
         fill
         className="object-contain"
-        sizes="48px"
+        sizes="(max-width: 768px) 10vw, 5vw"
+        priority
       />
     </div>
   );
