@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AppContent } from '@/components/AppContent';
 
 export const metadata: Metadata = {
-  title: 'Cash Compass',
+  title: 'HomieWorks',
   description: 'Manage your financial events with ease.',
   icons: {
     icon: '/newfavicon.ico?v=1',
