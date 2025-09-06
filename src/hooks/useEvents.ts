@@ -2,106 +2,98 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, Timestamp } from "firebase/firestore";
 import type { Event } from '@/lib/types';
+import { db } from '@/lib/firebase';
 import { useToast } from './use-toast';
 
-const LOCAL_STORAGE_KEY = 'financial_events';
-
-// Helper function to get events from local storage
-const getEventsFromLocalStorage = (): Event[] => {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  const storedEvents = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (storedEvents) {
-    try {
-      return JSON.parse(storedEvents);
-    } catch (e) {
-      console.error("Failed to parse events from local storage", e);
-      return [];
-    }
-  }
-  return [];
-};
-
-// Helper function to save events to local storage
-const saveEventsToLocalStorage = (events: Event[]) => {
-   if (typeof window !== 'undefined') {
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(events));
-  }
-};
-
+const EVENTS_COLLECTION = 'events';
 
 export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const eventsData = getEventsFromLocalStorage();
-    // Sort events by date in descending order
-    eventsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setEvents(eventsData);
-    setIsLoading(false);
-  }, []);
-  
-  const addEvent = useCallback((newEventData: Omit<Event, 'id'>) => {
+  const fetchEvents = useCallback(async () => {
+    setIsLoading(true);
     try {
-        const newEvent: Event = {
-            id: new Date().toISOString(), // Simple unique ID
-            ...newEventData
-        };
-        const updatedEvents = [newEvent, ...events];
-        updatedEvents.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setEvents(updatedEvents);
-        saveEventsToLocalStorage(updatedEvents);
+      const eventsCollection = collection(db, EVENTS_COLLECTION);
+      const q = query(eventsCollection, orderBy("date", "desc"));
+      const querySnapshot = await getDocs(q);
+      const eventsData: Event[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        // Ensure date is a string. Firestore Timestamps need to be converted.
+        const date = data.date instanceof Timestamp ? data.date.toDate().toISOString() : data.date;
+        return { id: doc.id, ...data, date } as Event;
+      });
+      setEvents(eventsData);
     } catch (error) {
-        console.error("Error adding event", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not save your new event.",
-        });
+      console.error("Error fetching events:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not fetch events from the database.",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [events, toast]);
+  }, [toast]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+  
+  const addEvent = useCallback(async (newEventData: Omit<Event, 'id'>) => {
+    try {
+      const eventsCollection = collection(db, EVENTS_COLLECTION);
+      await addDoc(eventsCollection, newEventData);
+      fetchEvents(); // Refetch events to get the new one
+    } catch (error) {
+      console.error("Error adding event", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not save your new event.",
+      });
+    }
+  }, [fetchEvents, toast]);
 
   const getEvent = useCallback((id: string) => {
-      return events.find(event => event.id === id);
+    return events.find(event => event.id === id);
   }, [events]);
 
-
-  const updateEvent = useCallback((updatedEvent: Event) => {
+  const updateEvent = useCallback(async (updatedEvent: Event) => {
     try {
-        const updatedEvents = events.map(event =>
-            event.id === updatedEvent.id ? updatedEvent : event
-        );
-        updatedEvents.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setEvents(updatedEvents);
-        saveEventsToLocalStorage(updatedEvents);
+      const eventDoc = doc(db, EVENTS_COLLECTION, updatedEvent.id);
+      // Omit the 'id' field from the data being sent to Firestore
+      const { id, ...eventData } = updatedEvent;
+      await updateDoc(eventDoc, eventData);
+      fetchEvents(); // Refetch to get updated list
     } catch (error) {
-        console.error("Error updating event", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not update your event.",
-        });
+      console.error("Error updating event", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not update your event.",
+      });
     }
-  }, [events, toast]);
+  }, [fetchEvents, toast]);
 
-  const deleteEvent = useCallback((id: string) => {
+  const deleteEvent = useCallback(async (id: string) => {
     try {
-        const updatedEvents = events.filter(event => event.id !== id);
-        setEvents(updatedEvents);
-        saveEventsToLocalStorage(updatedEvents);
+      const eventDoc = doc(db, EVENTS_COLLECTION, id);
+      await deleteDoc(eventDoc);
+      // Optimistically remove from UI, or refetch
+      setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
     } catch (error) {
-        console.error("Error deleting event", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not delete your event.",
-        });
+      console.error("Error deleting event", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete your event.",
+      });
     }
-  }, [events, toast]);
+  }, [toast]);
 
   return { events, isLoading, addEvent, getEvent, updateEvent, deleteEvent };
 }
