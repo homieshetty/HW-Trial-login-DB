@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { Event } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Logo } from '@/components/Logo';
 
 export default function Home() {
   const { events, isLoading, deleteEvent } = useEvents();
@@ -105,9 +106,12 @@ export default function Home() {
     <>
       <div className="container mx-auto p-4 md:p-6">
         <header className="flex items-center justify-between mb-6">
-          <div>
+          <div className="flex items-center gap-4">
+            <Logo className="h-10 w-10"/>
+            <div>
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <p className="text-sm text-muted-foreground">Your Financial Events</p>
+            </div>
           </div>
         </header>
         
