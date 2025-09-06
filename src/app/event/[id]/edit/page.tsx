@@ -13,6 +13,13 @@ import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
+// Required for static export - generates static params for dynamic routes
+export async function generateStaticParams() {
+  // Return empty array since we can't pre-generate all possible event IDs
+  // The app will handle dynamic routing client-side
+  return [];
+}
+
 export default function EditEventPage() {
   const router = useRouter();
   const params = useParams();

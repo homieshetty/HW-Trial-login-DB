@@ -15,6 +15,13 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
 
+// Required for static export - generates static params for dynamic routes
+export async function generateStaticParams() {
+  // Return empty array since we can't pre-generate all possible event IDs
+  // The app will handle dynamic routing client-side
+  return [];
+}
+
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
