@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -9,7 +10,7 @@ export function Logo({ className }: LogoProps) {
   return (
     <div className={cn('relative', className)}>
       <Image
-        src="/logo.png"
+        src="/favicon.ico"
         alt="Cash Compass Logo"
         fill
         className="object-contain"
