@@ -77,18 +77,18 @@ export function EventForm({ event }: EventFormProps) {
         },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const eventData = {
         ...values,
         date: values.date.toISOString(),
     };
     
     if (isEditMode && event) {
-      updateEvent({ ...event, ...eventData });
+      await updateEvent({ ...event, ...eventData });
       toast({ title: "Success", description: "Event updated successfully." });
       router.push(`/`);
     } else {
-      addEvent(eventData);
+      await addEvent(eventData);
       toast({ title: "Success", description: "Event created successfully." });
       router.push("/");
     }

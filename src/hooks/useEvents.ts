@@ -4,81 +4,96 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Event } from '@/lib/types';
 import { useToast } from './use-toast';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 
-const STORAGE_KEY = 'financial_events';
+const EVENTS_COLLECTION = 'events';
 
 export function useEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const getEventsFromStorage = useCallback((): Event[] => {
+  const getEventsFromFirestore = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const storedEvents = localStorage.getItem(STORAGE_KEY);
-      if (storedEvents) {
-        // Ensure date strings are valid before creating Date objects
-        return JSON.parse(storedEvents).sort((a: Event, b: Event) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      }
+      const eventsCollection = collection(db, EVENTS_COLLECTION);
+      const q = query(eventsCollection, orderBy("date", "desc"));
+      const querySnapshot = await getDocs(q);
+      const eventsData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Event));
+      setEvents(eventsData);
     } catch (error) {
-      console.error("Error parsing events from localStorage", error);
+      console.error("Error fetching events from Firestore", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not load saved events.",
+        description: "Could not load events from the cloud.",
       });
+    } finally {
+      setIsLoading(false);
     }
-    return [];
   }, [toast]);
 
   useEffect(() => {
-    setIsLoading(true);
-    setEvents(getEventsFromStorage());
-    setIsLoading(false);
-  }, [getEventsFromStorage]);
-
-  const saveEventsToStorage = (updatedEvents: Event[]) => {
+    getEventsFromFirestore();
+  }, [getEventsFromFirestore]);
+  
+  const addEvent = useCallback(async (newEventData: Omit<Event, 'id'>) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEvents));
-      // Re-sort and set state after any modification
-      setEvents(updatedEvents.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      const eventsCollection = collection(db, EVENTS_COLLECTION);
+      const docRef = await addDoc(eventsCollection, newEventData);
+      setEvents(prevEvents => [{ id: docRef.id, ...newEventData } as Event, ...prevEvents].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     } catch (error) {
-       console.error("Error saving events to localStorage", error);
+       console.error("Error adding event to Firestore", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not save your changes.",
+        description: "Could not save your new event.",
       });
     }
-  };
-
-  const addEvent = useCallback((newEventData: Omit<Event, 'id'>) => {
-    const currentEvents = getEventsFromStorage();
-    const newEvent: Event = {
-      ...newEventData,
-      id: Date.now().toString(), // Simple, URL-safe unique ID
-    };
-    saveEventsToStorage([...currentEvents, newEvent]);
-  }, [getEventsFromStorage]);
+  }, [toast]);
 
   const getEvent = useCallback((id: string) => {
-      return getEventsFromStorage().find(event => event.id === id);
-  }, [getEventsFromStorage]);
+      // This function can now find the event from the local state
+      // as it's populated from Firestore on load.
+      return events.find(event => event.id === id);
+  }, [events]);
 
 
-  const updateEvent = useCallback((updatedEvent: Event) => {
-    const currentEvents = getEventsFromStorage();
-    const eventIndex = currentEvents.findIndex(e => e.id === updatedEvent.id);
-    if (eventIndex > -1) {
-      currentEvents[eventIndex] = updatedEvent;
-      saveEventsToStorage(currentEvents);
+  const updateEvent = useCallback(async (updatedEvent: Event) => {
+    try {
+      const eventDoc = doc(db, EVENTS_COLLECTION, updatedEvent.id);
+      // We need to create a copy of the object without the id to update the document
+      const { id, ...eventData } = updatedEvent;
+      await updateDoc(eventDoc, eventData);
+      getEventsFromFirestore(); // Refresh data from firestore
+    } catch (error) {
+       console.error("Error updating event in Firestore", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not update your event.",
+      });
     }
-  }, [getEventsFromStorage]);
+  }, [toast, getEventsFromFirestore]);
 
-  const deleteEvent = useCallback((id: string) => {
-    const currentEvents = getEventsFromStorage();
-    const filteredEvents = currentEvents.filter(event => event.id !== id);
-    saveEventsToStorage(filteredEvents);
-  }, [getEventsFromStorage]);
+  const deleteEvent = useCallback(async (id: string) => {
+    try {
+        const eventDoc = doc(db, EVENTS_COLLECTION, id);
+        await deleteDoc(eventDoc);
+        setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
+    } catch (error) {
+        console.error("Error deleting event from Firestore", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not delete your event.",
+        });
+    }
+  }, [toast]);
 
   return { events, isLoading, addEvent, getEvent, updateEvent, deleteEvent };
 }

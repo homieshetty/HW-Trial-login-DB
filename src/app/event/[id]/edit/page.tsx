@@ -14,27 +14,32 @@ import { useToast } from "@/hooks/use-toast";
 export default function EditEventPage() {
   const router = useRouter();
   const params = useParams();
-  const { getEvent, isLoading } = useEvents();
+  const { getEvent, isLoading: areEventsLoading } = useEvents();
   const [event, setEvent] = useState<Event | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
     if (id) {
-      const foundEvent = getEvent(id);
-      if (foundEvent) {
-        setEvent(foundEvent);
-      } else {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Event not found.",
-        });
-        router.replace('/');
+      // getEvent is now synchronous if data is loaded
+      if (!areEventsLoading) {
+        const foundEvent = getEvent(id);
+        if (foundEvent) {
+          setEvent(foundEvent);
+        } else {
+          toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Event not found.",
+          });
+          router.replace('/');
+        }
+        setIsLoading(false);
       }
     }
-  }, [id, getEvent, router, toast]);
+  }, [id, getEvent, router, toast, areEventsLoading]);
 
   return (
     <div className="container mx-auto p-4 md:p-6 max-w-2xl">

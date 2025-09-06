@@ -17,7 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { getEvent, deleteEvent } = useEvents();
+  const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents();
   const [event, setEvent] = useState<Event | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const { toast } = useToast();
@@ -25,7 +25,7 @@ export default function EventDetailPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
   useEffect(() => {
-    if (id) {
+    if (id && !areEventsLoading) {
       const foundEvent = getEvent(id);
       if (foundEvent) {
         setEvent(foundEvent);
@@ -38,11 +38,11 @@ export default function EventDetailPage() {
         router.replace('/');
       }
     }
-  }, [id, getEvent, router, toast]);
+  }, [id, getEvent, router, toast, areEventsLoading]);
   
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (event) {
-      deleteEvent(event.id);
+      await deleteEvent(event.id);
       toast({
         title: "Event Deleted",
         description: `"${event.name}" has been removed.`,

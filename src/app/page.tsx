@@ -79,9 +79,9 @@ export default function Home() {
     setIsDeleteConfirmOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedEvent) {
-      deleteEvent(selectedEvent.id);
+      await deleteEvent(selectedEvent.id);
       toast({
         title: "Event Deleted",
         description: `"${selectedEvent.name}" has been removed.`,
