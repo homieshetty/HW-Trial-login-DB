@@ -10,10 +10,10 @@ export function Logo({ className }: LogoProps) {
   return (
     <div className={cn('relative', className)}>
       <Image
-        src="/favicon.ico"
-        alt="Cash Compass Logo"
+        src="/logo.png"
+        alt="Logo"
         fill
-        className="object-contain grayscale"
+        className="object-contain"
         sizes="40px"
       />
     </div>
