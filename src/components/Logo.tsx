@@ -10,11 +10,11 @@ export function Logo({ className }: LogoProps) {
   return (
     <div className={cn('relative', className)}>
       <Image
-        src="/logo.png"
+        src="/favicon.ico"
         alt="Logo"
         fill
         className="object-contain"
-        sizes="40px"
+        sizes="48px"
       />
     </div>
   );
