@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -14,28 +13,26 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { EventForm } from "@/components/EventForm";
 
-// Required for static export - generates static params for dynamic routes
-export async function generateStaticParams() {
-  // Return empty array since we can't pre-generate all possible event IDs
-  // The app will handle dynamic routing client-side
-  return [];
-}
-
-export default function EventDetailPage() {
+export default function EventPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAuth();
   const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents(user?.uid);
   const [event, setEvent] = useState<Event | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  // Handle dynamic routing: /event/[id] or /event/[id]/edit
+  const pathSegments = Array.isArray(params.params) ? params.params : [params.params];
+  const eventId = pathSegments[0];
+  const isEditPage = pathSegments[1] === 'edit';
 
   useEffect(() => {
-    if (id && !areEventsLoading) {
-      const foundEvent = getEvent(id);
+    if (eventId && !areEventsLoading) {
+      const foundEvent = getEvent(eventId);
       if (foundEvent) {
         setEvent(foundEvent);
       } else {
@@ -46,8 +43,9 @@ export default function EventDetailPage() {
         });
         router.replace('/');
       }
+      setIsLoading(false);
     }
-  }, [id, getEvent, router, toast, areEventsLoading]);
+  }, [eventId, getEvent, router, toast, areEventsLoading]);
   
   const handleDelete = async () => {
     if (event) {
@@ -78,6 +76,40 @@ export default function EventDetailPage() {
     }
   };
 
+  // Show edit form if this is the edit page
+  if (isEditPage) {
+    return (
+      <div className="container mx-auto p-4 md:p-6 max-w-2xl">
+        <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Event
+        </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Edit Event</CardTitle>
+            <CardDescription>Update the details of your financial event.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading || areEventsLoading || !event ? (
+              <div className="space-y-8">
+                <Skeleton className="h-10 w-full" />
+                <div className="grid grid-cols-2 gap-8">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            ) : (
+              <EventForm event={event} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show event detail page
   return (
     <div className="container mx-auto p-4 md:p-6 max-w-2xl">
       <div className="flex justify-between items-center mb-4">
@@ -86,7 +118,7 @@ export default function EventDetailPage() {
           Back
         </Button>
         <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/event/${id}/edit`)}>
+            <Button variant="outline" onClick={() => router.push(`/event/${eventId}/edit`)}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
             </Button>
