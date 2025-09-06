@@ -10,7 +10,7 @@ export function Logo({ className }: LogoProps) {
   return (
     <div className={cn('relative', className)}>
       <Image
-        src="/favicon.ico"
+        src="/newfavicon.ico"
         alt="Logo"
         fill
         className="object-contain"
