@@ -10,15 +10,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Pencil } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import type { Event } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
-  const { events, isLoading, deleteEvent } = useEvents();
+  const { user, logout } = useAuth();
+  const { events, isLoading, deleteEvent } = useEvents(user?.uid);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -101,6 +103,15 @@ export default function Home() {
         return 'outline';
     }
   };
+  
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+  };
 
   return (
     <>
@@ -113,6 +124,10 @@ export default function Home() {
               <p className="text-sm text-muted-foreground">Your Financial Events</p>
             </div>
           </div>
+           <Button variant="ghost" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
         </header>
         
         <Card>

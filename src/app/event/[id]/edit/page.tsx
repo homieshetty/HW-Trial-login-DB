@@ -11,11 +11,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function EditEventPage() {
   const router = useRouter();
   const params = useParams();
-  const { getEvent, isLoading: areEventsLoading } = useEvents();
+  const { user } = useAuth();
+  const { getEvent, isLoading: areEventsLoading } = useEvents(user?.uid);
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();

@@ -13,11 +13,13 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents();
+  const { user } = useAuth();
+  const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents(user?.uid);
   const [event, setEvent] = useState<Event | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const { toast } = useToast();

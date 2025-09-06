@@ -18,6 +18,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { cn } from "@/lib/utils";
 import type { Event } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Event name must be at least 2 characters." }).max(50),
@@ -42,7 +43,8 @@ type EventFormProps = {
 
 export function EventForm({ event }: EventFormProps) {
   const router = useRouter();
-  const { addEvent, updateEvent } = useEvents();
+  const { user } = useAuth();
+  const { addEvent, updateEvent } = useEvents(user?.uid);
   const { toast } = useToast();
   const isEditMode = !!event;
 

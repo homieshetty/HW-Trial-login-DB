@@ -1,17 +1,23 @@
+
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/add', label: 'Add Event', icon: PlusCircle },
   ];
+  
+  // Don't render if there's no user
+  if (!user) return null;
 
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full border-t bg-card/95 backdrop-blur-sm">
