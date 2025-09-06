@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { BottomNav } from './BottomNav';
 import { Skeleton } from './ui/skeleton';
 
-const publicPaths = ['/login', '/signup'];
+const publicPaths = ['/login'];
 
 export function AppContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
