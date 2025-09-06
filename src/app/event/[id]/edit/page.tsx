@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -23,7 +24,6 @@ export default function EditEventPage() {
 
   useEffect(() => {
     if (id) {
-      // getEvent is now synchronous if data is loaded
       if (!areEventsLoading) {
         const foundEvent = getEvent(id);
         if (foundEvent) {
@@ -53,7 +53,7 @@ export default function EditEventPage() {
           <CardDescription>Update the details of your financial event.</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading || !event ? (
+          {isLoading || areEventsLoading || !event ? (
             <div className="space-y-8">
               <Skeleton className="h-10 w-full" />
               <div className="grid grid-cols-2 gap-8">

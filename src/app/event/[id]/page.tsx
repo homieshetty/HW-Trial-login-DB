@@ -90,7 +90,7 @@ export default function EventDetailPage() {
       
       <Card>
         <CardHeader>
-          {event ? (
+          {event && !areEventsLoading ? (
             <>
               <CardTitle className="text-2xl">{event.name}</CardTitle>
               <CardDescription>Type: {event.type}</CardDescription>
@@ -103,7 +103,7 @@ export default function EventDetailPage() {
           )}
         </CardHeader>
         <CardContent>
-          {event ? (
+          {event && !areEventsLoading ? (
             <div className="space-y-4 text-sm">
                 <div className="flex items-center gap-4">
                     <Calendar className="h-5 w-5 text-muted-foreground" />
