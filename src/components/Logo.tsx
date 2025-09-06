@@ -13,7 +13,7 @@ export function Logo({ className }: LogoProps) {
         src="/favicon.ico"
         alt="Cash Compass Logo"
         fill
-        className="object-contain"
+        className="object-contain grayscale"
         sizes="40px"
       />
     </div>
