@@ -22,7 +22,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -32,6 +32,31 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  // Show loading state while Firebase initializes
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Logo className="h-20 w-20"/>
+            </div>
+            <CardTitle className="text-2xl">Loading...</CardTitle>
+            <CardDescription>Initializing authentication</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              If this takes too long, please refresh the page
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -90,6 +115,14 @@ export default function LoginPage() {
                 {form.formState.isSubmitting ? "Signing In..." : "Sign In"}
               </Button>
             </form>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link href="/signup" className="text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
+            </div>
           </Form>
         </CardContent>
       </Card>

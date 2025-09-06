@@ -23,12 +23,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const auth = getAuth(app);
 
   useEffect(() => {
+    // Set a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
+      clearTimeout(timeout);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [auth]);
 
   const signup = async ({ email, password }: SignUpFormData) => {

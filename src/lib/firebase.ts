@@ -15,11 +15,21 @@ const firebaseConfig = {
   "messagingSenderId": "372604921525"
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase with error handling
+let app;
+let db;
+let auth;
 
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
-const auth = getAuth(app);
+try {
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  db = getFirestore(app);
+  auth = getAuth(app);
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+  // Fallback initialization
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+}
 
 export { db, app, auth };
