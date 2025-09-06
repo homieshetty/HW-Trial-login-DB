@@ -107,7 +107,7 @@ export default function Home() {
       <div className="container mx-auto p-4 md:p-6">
         <header className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Logo className="h-8 w-8"/>
+            <Logo className="h-12 w-12"/>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-sm text-muted-foreground">Your Financial Events</p>
