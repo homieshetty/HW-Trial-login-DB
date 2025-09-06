@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useEvents } from "@/hooks/useEvents";
 import type { Event } from "@/lib/types";
@@ -17,7 +17,7 @@ import { EventForm } from "@/components/EventForm";
 
 export default function EventPage() {
   const router = useRouter();
-  const params = useParams();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents(user?.uid);
   const [event, setEvent] = useState<Event | null>(null);
@@ -25,10 +25,9 @@ export default function EventPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Handle dynamic routing: /event/[id] or /event/[id]/edit
-  const pathSegments = Array.isArray(params.params) ? params.params : [params.params];
-  const eventId = pathSegments[0];
-  const isEditPage = pathSegments[1] === 'edit';
+  // Get event ID and edit mode from URL search params
+  const eventId = searchParams.get('id');
+  const isEditMode = searchParams.get('mode') === 'edit';
 
   useEffect(() => {
     if (eventId && !areEventsLoading) {
@@ -76,8 +75,8 @@ export default function EventPage() {
     }
   };
 
-  // Show edit form if this is the edit page
-  if (isEditPage) {
+  // Show edit form if this is edit mode
+  if (isEditMode) {
     return (
       <div className="container mx-auto p-4 md:p-6 max-w-2xl">
         <Button variant="ghost" onClick={() => router.back()} className="mb-4">
@@ -118,7 +117,7 @@ export default function EventPage() {
           Back
         </Button>
         <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push(`/event/${eventId}/edit`)}>
+            <Button variant="outline" onClick={() => router.push(`/event?id=${eventId}&mode=edit`)}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
             </Button>

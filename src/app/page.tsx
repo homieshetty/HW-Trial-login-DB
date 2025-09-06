@@ -52,7 +52,7 @@ export default function Home() {
   const handlePressEnd = (eventData: Event) => {
     clearTimeout(longPressTimer.current);
     if (!wasLongPress.current && !hasScrolled.current) {
-      router.push(`/event/${eventData.id}`);
+      router.push(`/event?id=${eventData.id}`);
     }
   };
   
@@ -71,7 +71,7 @@ export default function Home() {
 
   const handleEdit = () => {
     if (selectedEvent) {
-      router.push(`/event/${selectedEvent.id}/edit`);
+      router.push(`/event?id=${selectedEvent.id}&mode=edit`);
     }
     setIsActionAlertOpen(false);
   };
