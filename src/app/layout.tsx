@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: 'Cash Compass',
   description: 'Manage your financial events with ease.',
   icons: {
-    icon: '/newfavicon.ico',
+    icon: '/newfavicon.ico?v=1',
   },
 };
 
