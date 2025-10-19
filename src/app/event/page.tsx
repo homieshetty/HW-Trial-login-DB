@@ -19,7 +19,7 @@ export default function EventPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents(user?.uid);
+  const { getEvent, deleteEvent, isLoading: areEventsLoading } = useEvents(user?.id);
   const [event, setEvent] = useState<Event | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

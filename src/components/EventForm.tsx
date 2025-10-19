@@ -44,7 +44,7 @@ type EventFormProps = {
 export function EventForm({ event }: EventFormProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const { addEvent, updateEvent } = useEvents(user?.uid);
+  const { addEvent, updateEvent } = useEvents(user?.id);
   const { toast } = useToast();
   const isEditMode = !!event;
 

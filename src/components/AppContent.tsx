@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { BottomNav } from './BottomNav';
 import { Skeleton } from './ui/skeleton';
 
-const publicPaths = ['/login'];
+const publicPaths = ['/login', '/signup'];
 
 export function AppContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -26,8 +26,9 @@ export function AppContent({ children }: { children: React.ReactNode }) {
     }
   }, [user, loading, router, isPublicPath, pathname]);
 
-  // While loading, or if we're waiting for the redirect to happen, show a loading state
-  if (loading || (!user && !isPublicPath) || (user && isPublicPath)) {
+  // While loading, show a loading state
+  // OR if we need to redirect (user exists on public path, or no user on private path)
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
           <div className="w-full max-w-md p-8 space-y-8">

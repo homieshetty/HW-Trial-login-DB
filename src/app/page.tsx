@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
   const { user, logout } = useAuth();
-  const { events, isLoading, deleteEvent } = useEvents(user?.uid);
+  const { events, isLoading, deleteEvent } = useEvents(user?.id);
   const router = useRouter();
   const { toast } = useToast();
 
