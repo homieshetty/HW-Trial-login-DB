@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
   const { user, logout } = useAuth();
-  const { events, isLoading, deleteEvent } = useEvents(user?.id);
+  const { events, isLoading, deleteEvent, updateEvent } = useEvents(user?.id);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -32,16 +32,18 @@ export default function Home() {
   const wasLongPress = useRef(false);
   const hasScrolled = useRef(false);
   const touchStartY = useRef(0);
+  const wasBadgeClick = useRef(false);
 
   const handlePressStart = (eventData: Event, e?: React.TouchEvent) => {
     wasLongPress.current = false;
     hasScrolled.current = false;
+    wasBadgeClick.current = false;
     if (e) {
       touchStartY.current = e.touches[0].clientY;
     }
     
     longPressTimer.current = setTimeout(() => {
-      if (!hasScrolled.current) {
+      if (!hasScrolled.current && !wasBadgeClick.current) {
         wasLongPress.current = true;
         setSelectedEvent(eventData);
         setIsActionAlertOpen(true);
@@ -51,7 +53,7 @@ export default function Home() {
 
   const handlePressEnd = (eventData: Event) => {
     clearTimeout(longPressTimer.current);
-    if (!wasLongPress.current && !hasScrolled.current) {
+    if (!wasLongPress.current && !hasScrolled.current && !wasBadgeClick.current) {
       router.push(`/event?id=${eventData.id}`);
     }
   };
@@ -113,6 +115,21 @@ export default function Home() {
     });
   };
 
+  const handlePaymentStatusToggle = async (event: Event, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click event
+    wasBadgeClick.current = true; // Mark that badge was clicked
+    
+    const newStatus: 'Paid' | 'Unpaid' = event.paymentStatus === 'Paid' ? 'Unpaid' : 'Paid';
+    const updatedEvent: Event = { ...event, paymentStatus: newStatus };
+    
+    await updateEvent(updatedEvent);
+    
+    toast({
+      title: "Payment Status Updated",
+      description: `"${event.name}" is now marked as ${newStatus}.`,
+    });
+  };
+
   return (
     <>
       <div className="container mx-auto p-4 md:p-6">
@@ -171,7 +188,15 @@ export default function Home() {
                         {format(new Date(event.date), 'PPP')}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={getStatusVariant(event.paymentStatus)}>{event.paymentStatus}</Badge>
+                        <Badge 
+                          variant={getStatusVariant(event.paymentStatus)}
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onMouseUp={(e) => e.stopPropagation()}
+                          onClick={(e) => handlePaymentStatusToggle(event, e)}
+                        >
+                          {event.paymentStatus}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
