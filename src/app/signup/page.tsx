@@ -38,11 +38,12 @@ export default function SignUpPage() {
       await signup(values);
       toast({ title: "Success", description: "Account created successfully. You are now logged in." });
       router.push("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         variant: "destructive",
         title: "Sign Up Failed",
-        description: error.message || "An unexpected error occurred.",
+        description: errorMessage,
       });
     }
   }

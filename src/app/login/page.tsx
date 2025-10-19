@@ -63,11 +63,12 @@ export default function LoginPage() {
       await login(values);
       toast({ title: "Success", description: "Logged in successfully." });
       router.push("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message || "An unexpected error occurred.",
+        description: errorMessage,
       });
     }
   }
@@ -117,7 +118,7 @@ export default function LoginPage() {
             </form>
             <div className="mt-4 text-center">
               <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/signup" className="text-primary hover:underline">
                   Sign up
                 </Link>

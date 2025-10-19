@@ -2,14 +2,14 @@
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, User, Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { app } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
+import type { User, Session } from '@supabase/supabase-js';
 import type { LoginFormData, SignUpFormData } from '@/lib/types';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
-  auth: Auth;
   signup: (data: SignUpFormData) => Promise<User | null>;
   login: (data: LoginFormData) => Promise<User | null>;
   logout: () => Promise<void>;
@@ -19,31 +19,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth(app);
 
   useEffect(() => {
-    // Set a timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
-    }, 10000); // 10 second timeout
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      clearTimeout(timeout);
     });
 
-    return () => {
-      unsubscribe();
-      clearTimeout(timeout);
-    };
-  }, [auth]);
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signup = async ({ email, password }: SignUpFormData) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      if (!email || !password) {
+        throw new Error("Email and password are required");
+      }
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      return data.user;
     } catch (error) {
       console.error("Error during sign up:", error);
       throw error;
@@ -51,9 +62,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async ({ email, password }: LoginFormData) => {
-     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+    try {
+      if (!email || !password) {
+        throw new Error("Email and password are required");
+      }
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      return data.user;
     } catch (error) {
       console.error("Error during login:", error);
       throw error;
@@ -62,17 +82,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-        await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
-        console.error("Error during logout:", error);
-        throw error;
+      console.error("Error during logout:", error);
+      throw error;
     }
   };
 
   const value = {
     user,
+    session,
     loading,
-    auth,
     signup,
     login,
     logout,

@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
   const { user, logout } = useAuth();
-  const { events, isLoading, deleteEvent } = useEvents(user?.uid);
+  const { events, isLoading, deleteEvent } = useEvents(user?.id);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -196,7 +196,7 @@ export default function Home() {
       <AlertDialog open={isActionAlertOpen} onOpenChange={setIsActionAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Actions for "{selectedEvent?.name}"</AlertDialogTitle>
+            <AlertDialogTitle>Actions for &quot;{selectedEvent?.name}&quot;</AlertDialogTitle>
             <AlertDialogDescription>
               What would you like to do with this event?
             </AlertDialogDescription>
@@ -222,7 +222,7 @@ export default function Home() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the event
-              <span className="font-bold"> "{selectedEvent?.name}"</span>.
+              <span className="font-bold"> &quot;{selectedEvent?.name}&quot;</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

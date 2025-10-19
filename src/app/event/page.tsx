@@ -208,7 +208,7 @@ export default function EventPage() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the event
-              <span className="font-bold"> "{event?.name}"</span>.
+              <span className="font-bold"> &quot;{event?.name}&quot;</span>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
