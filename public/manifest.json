@@ -1,0 +1,19 @@
+{
+  "name": "HomieWorks - Financial Event Manager",
+  "short_name": "HomieWorks",
+  "description": "Manage your financial events with ease",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/newfavicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "screenshots": []
+}

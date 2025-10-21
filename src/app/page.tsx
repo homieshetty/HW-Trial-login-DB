@@ -172,27 +172,35 @@ export default function Home() {
                   {events.map((event) => (
                     <TableRow 
                       key={event.id}
-                      onMouseDown={() => handlePressStart(event)}
-                      onMouseUp={() => handlePressEnd(event)}
-                      onMouseLeave={handlePressCancel}
-                      onTouchStart={(e) => handlePressStart(event, e)}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={() => handlePressEnd(event)}
-                      className="cursor-pointer hover:bg-accent/50 select-none"
+                      className="select-none"
                     >
-                      <TableCell>
+                      <TableCell
+                        onMouseDown={() => handlePressStart(event)}
+                        onMouseUp={() => handlePressEnd(event)}
+                        onMouseLeave={handlePressCancel}
+                        onTouchStart={(e) => handlePressStart(event, e)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={() => handlePressEnd(event)}
+                        className="cursor-pointer hover:bg-accent/50"
+                      >
                         <div className="font-medium">{event.name}</div>
                         <div className="text-sm text-muted-foreground md:hidden">{format(new Date(event.date), 'MMM d, yyyy')}</div>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell">
+                      <TableCell 
+                        className="hidden md:table-cell cursor-pointer hover:bg-accent/50"
+                        onMouseDown={() => handlePressStart(event)}
+                        onMouseUp={() => handlePressEnd(event)}
+                        onMouseLeave={handlePressCancel}
+                        onTouchStart={(e) => handlePressStart(event, e)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={() => handlePressEnd(event)}
+                      >
                         {format(new Date(event.date), 'PPP')}
                       </TableCell>
                       <TableCell className="text-right">
                         <Badge 
                           variant={getStatusVariant(event.paymentStatus)}
                           className="cursor-pointer hover:opacity-80 transition-opacity"
-                          onMouseDown={(e) => e.stopPropagation()}
-                          onMouseUp={(e) => e.stopPropagation()}
                           onClick={(e) => handlePaymentStatusToggle(event, e)}
                         >
                           {event.paymentStatus}
